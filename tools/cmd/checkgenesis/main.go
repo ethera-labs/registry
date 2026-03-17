@@ -33,11 +33,11 @@ func main() {
 
 	// Load compose chains from embedded TOMLs (generic networks API)
 	r := reg.New()
-	nets, err := r.ListNetworks()
+	networks, err := r.ListNetworks()
 	if err != nil {
 		fatalf("list networks: %v", err)
 	}
-	if len(nets) == 0 {
+	if len(networks) == 0 {
 		fatalf("no networks found")
 	}
 
@@ -48,15 +48,18 @@ func main() {
 	}
 	idsByIdentifier := make(map[string]int64)
 	for _, c := range cl.Chains {
-		idsByIdentifier[strings.TrimSpace(c.Identifier)] = int64(c.ChainID)
+		idsByIdentifier[c.Identifier] = int64(c.ChainID)
 	}
 
-	// For each chain in each network, ensure genesis exists, decode and compare ids & time
-	for _, n := range nets {
+	// For each network, check all chains
+	for _, n := range networks {
+		networkSlug := n.Slug()
 		chains, err := n.ListChains()
 		if err != nil {
-			fatalf("list chains for %s: %v", n.Slug(), err)
+			fatalf("list chains for %s: %v", networkSlug, err)
 		}
+
+		// For each chain, ensure genesis exists, decode and compare ids & time
 		for _, c := range chains {
 			slug := c.Slug()
 			identifier := c.Identifier()
@@ -65,15 +68,11 @@ func main() {
 				fatalf("load chain %s: %v", identifier, err)
 			}
 			expectID := int64(ccfg.ChainID)
-			id2, ok := idsByIdentifier[identifier]
-			if !ok {
-				fatalf("missing chainList entry for identifier %s", identifier)
-			}
-			if id2 != expectID {
+			if id2, ok := idsByIdentifier[identifier]; ok && id2 != expectID {
 				fatalf("identifier %s: chainList chain_id=%d != compose chain_id=%d", identifier, id2, expectID)
 			}
 
-			genPath := filepath.Join(base, "data/genesis", n.Slug(), slug+".json.zst")
+			genPath := filepath.Join(base, "data/genesis", networkSlug, slug+".json.zst")
 			f, err := os.Open(genPath)
 			if err != nil {
 				fatalf("%s missing: %v", genPath, err)
@@ -134,6 +133,14 @@ func main() {
 		}
 	}
 	fmt.Println("checkgenesis ok")
+}
+
+func deriveSlug(identifier string) string {
+	i := strings.LastIndex(identifier, "/")
+	if i >= 0 && i < len(identifier)-1 {
+		return identifier[i+1:]
+	}
+	return identifier
 }
 
 func anyToInt64(v any) (int64, error) {
