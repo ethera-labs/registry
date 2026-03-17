@@ -41,3 +41,25 @@
   [chains.parent]
     type = "L2"
     chain = "hoodi"
+
+[[chains]]
+  name = "rollup-a"
+  identifier = "sepolia/rollup-a"
+  chain_id = 555555
+  rpc = ["https://rpc-a-altda.sepolia.compose.network"]
+  explorers = ["https://rollup-a-altda.explorer.sepolia.compose.network"]
+  data_availability_type = "eth-da"
+  [chains.parent]
+    type = "L2"
+    chain = "sepolia"
+
+[[chains]]
+  name = "rollup-b"
+  identifier = "sepolia/rollup-b"
+  chain_id = 666666
+  rpc = ["https://rpc-b-altda.sepolia.compose.network"]
+  explorers = ["https://rollup-b-altda.explorer.sepolia.compose.network"]
+  data_availability_type = "eth-da"
+  [chains.parent]
+    type = "L2"
+    chain = "sepolia"
