@@ -1,4 +1,4 @@
-module github.com/compose-network/registry
+module github.com/ethera-labs/registry
 
 go 1.23
 

@@ -1,6 +1,6 @@
 <p align="center"><img src="https://framerusercontent.com/images/9FedKxMYLZKR9fxBCYj90z78.png?scale-down-to=512&width=893&height=363" alt="SSV Network"></p>
 
-<img src="https://github.com/compose-network/registry/actions/workflows/ci.yml/badge.svg" alt="CI" />
+<img src="https://github.com/ethera-labs/registry/actions/workflows/ci.yml/badge.svg" alt="CI" />
 <a href="https://discord.gg/compose-network"><img src="https://img.shields.io/badge/discord-compose--network-5865F2.svg" alt="Discord" /></a>
 
 
@@ -17,9 +17,9 @@ By embedding the registry you get:
 
 The goal is to keep network metadata lightweight, auditable, and easy to consume across the ecosystem.
 
-- Module: `github.com/compose-network/registry`
+- Module: `github.com/ethera-labs/registry`
 - Embedded sources: `data/networks/<net>/*.toml` and `data/networks/<net>/compose.toml`
-- Public API: `github.com/compose-network/registry/registry`
+- Public API: `github.com/ethera-labs/registry/registry`
   - Lightweight handles + on‑demand LoadConfig (instance‑based).
 
 ### Layout
@@ -71,11 +71,11 @@ go run ./tools/cmd/validate -in data/chainList.toml
 ## 📦 Usage (as a module)
 
 ```bash
-go get github.com/compose-network/registry
+go get github.com/ethera-labs/registry
 ```
 
 ```go
-import reg "github.com/compose-network/registry/registry"
+import reg "github.com/ethera-labs/registry/registry"
 
 r := reg.New()
 nets, _ := r.ListNetworks()                    // []Network handles

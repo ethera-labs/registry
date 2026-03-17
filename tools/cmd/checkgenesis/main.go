@@ -13,8 +13,8 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	t "github.com/compose-network/registry/internal/types"
-	reg "github.com/compose-network/registry/registry"
+	t "github.com/ethera-labs/registry/internal/types"
+	reg "github.com/ethera-labs/registry/registry"
 	"github.com/klauspost/compress/zstd"
 )
 
