@@ -12,7 +12,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	assets "github.com/compose-network/registry"
+	assets "github.com/ethera-labs/registry"
 )
 
 // Sentinel errors for not-found cases. Use errors.Is to test them.

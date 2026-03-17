@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	t "github.com/compose-network/registry/internal/types"
+	t "github.com/ethera-labs/registry/internal/types"
 )
 
 var identRe = regexp.MustCompile(`^[a-z0-9-]+/[a-z0-9-]+$`)

@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	t "github.com/compose-network/registry/internal/types"
+	t "github.com/ethera-labs/registry/internal/types"
 )
 
 type chainCfg struct {

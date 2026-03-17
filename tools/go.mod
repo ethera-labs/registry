@@ -1,4 +1,4 @@
-module github.com/compose-network/registry/tools
+module github.com/ethera-labs/registry/tools
 
 go 1.24.9
 
@@ -8,7 +8,7 @@ tool golang.org/x/tools/cmd/goimports
 
 require (
 	github.com/BurntSushi/toml v1.5.0
-	github.com/compose-network/registry v0.0.0-00010101000000-000000000000
+	github.com/ethera-labs/registry v0.0.0-00010101000000-000000000000
 	github.com/klauspost/compress v1.18.0
 )
 
@@ -221,4 +221,4 @@ require (
 	mvdan.cc/unparam v0.0.0-20250301125049-0df0534333a4 // indirect
 )
 
-replace github.com/compose-network/registry => ..
+replace github.com/ethera-labs/registry => ..
