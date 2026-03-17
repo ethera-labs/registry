@@ -1,0 +1,11 @@
+name = "sepolia"
+
+[l1]
+chain_id = 11155111
+public_rpc = "https://ethereum-sepolia-rpc.publicnode.com"
+explorer  = "https://sepolia.etherscan.io/"
+
+[publisher]
+superblock_contract = "0x0000000000000000000000000000000000000001"
+dispute_game_factory = "0xca79ab8ed396157c3bdc4e842f7e02419b07cb96"
+auth_pubkeys = []

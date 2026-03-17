@@ -1,0 +1,15 @@
+name = "rollup-b"
+public_rpc = "https://rpc-b-altda.sepolia.compose.network"
+explorer = "https://rollup-b-altda.explorer.sepolia.compose.network"
+chain_id = 666666
+
+[addresses]
+Mailbox = "0x0000000000000000000000000000000000000000"
+
+[genesis]
+l2_time = 1773748968
+
+[sequencer]
+host = "ethera-op-stack-b-altda-geth"
+port = 9898
+auth_pubkeys = []

@@ -33,16 +33,12 @@ func main() {
 
 	// Load compose chains from embedded TOMLs (generic networks API)
 	r := reg.New()
-	n, err := r.GetNetworkBySlug("hoodi")
+	networks, err := r.ListNetworks()
 	if err != nil {
-		fatalf("get network hoodi: %v", err)
+		fatalf("list networks: %v", err)
 	}
-	chains, err := n.ListChains()
-	if err != nil {
-		fatalf("compose chains: %v", err)
-	}
-	if len(chains) == 0 {
-		fatalf("no compose chains found")
+	if len(networks) == 0 {
+		fatalf("no networks found")
 	}
 
 	// Load chainList for cross-check
@@ -50,80 +46,89 @@ func main() {
 	if _, err := toml.DecodeFile(filepath.Join(base, "data/chainList.toml"), &cl); err != nil {
 		fatalf("decode chainList.toml: %v", err)
 	}
-	idsBySlug := make(map[string]int64)
+	idsByIdentifier := make(map[string]int64)
 	for _, c := range cl.Chains {
-		slug := deriveSlug(c.Identifier)
-		idsBySlug[slug] = int64(c.ChainID)
+		idsByIdentifier[c.Identifier] = int64(c.ChainID)
 	}
 
-	// For each chain, ensure genesis exists, decode and compare ids & time
-	for _, c := range chains {
-		slug := c.Slug()
-		ccfg, err := c.LoadConfig()
+	// For each network, check all chains
+	for _, n := range networks {
+		networkSlug := n.Slug()
+		chains, err := n.ListChains()
 		if err != nil {
-			fatalf("load chain %s: %v", slug, err)
-		}
-		expectID := int64(ccfg.ChainID)
-		if id2, ok := idsBySlug[slug]; ok && id2 != expectID {
-			fatalf("slug %s: chainList chain_id=%d != compose chain_id=%d", slug, id2, expectID)
+			fatalf("list chains for %s: %v", networkSlug, err)
 		}
 
-		genPath := filepath.Join(base, "data/genesis/hoodi", slug+".json.zst")
-		f, err := os.Open(genPath)
-		if err != nil {
-			fatalf("%s missing: %v", genPath, err)
-		}
-		zr, err := zstd.NewReader(f)
-		var raw []byte
-		if err == nil {
-			raw, err = io.ReadAll(zr)
-			zr.Close()
+		// For each chain, ensure genesis exists, decode and compare ids & time
+		for _, c := range chains {
+			slug := c.Slug()
+			identifier := c.Identifier()
+			ccfg, err := c.LoadConfig()
 			if err != nil {
-				// Fallback to plain JSON if decode fails
+				fatalf("load chain %s: %v", identifier, err)
+			}
+			expectID := int64(ccfg.ChainID)
+			if id2, ok := idsByIdentifier[identifier]; ok && id2 != expectID {
+				fatalf("identifier %s: chainList chain_id=%d != compose chain_id=%d", identifier, id2, expectID)
+			}
+
+			genPath := filepath.Join(base, "data/genesis", networkSlug, slug+".json.zst")
+			f, err := os.Open(genPath)
+			if err != nil {
+				fatalf("%s missing: %v", genPath, err)
+			}
+			zr, err := zstd.NewReader(f)
+			var raw []byte
+			if err == nil {
+				raw, err = io.ReadAll(zr)
+				zr.Close()
+				if err != nil {
+					// Fallback to plain JSON if decode fails
+					if _, serr := f.Seek(0, 0); serr != nil {
+						fatalf("seek %s: %v", genPath, serr)
+					}
+					raw, err = io.ReadAll(f)
+					if err != nil {
+						fatalf("read %s: %v", genPath, err)
+					}
+				}
+				if cerr := f.Close(); cerr != nil {
+					fatalf("close %s: %v", genPath, cerr)
+				}
+			} else {
+				// Fallback to plain JSON for dev files
 				if _, serr := f.Seek(0, 0); serr != nil {
 					fatalf("seek %s: %v", genPath, serr)
 				}
 				raw, err = io.ReadAll(f)
+				if cerr := f.Close(); cerr != nil {
+					fatalf("close %s: %v", genPath, cerr)
+				}
 				if err != nil {
 					fatalf("read %s: %v", genPath, err)
 				}
 			}
-			if cerr := f.Close(); cerr != nil {
-				fatalf("close %s: %v", genPath, cerr)
-			}
-		} else {
-			// Fallback to plain JSON for dev files
-			if _, serr := f.Seek(0, 0); serr != nil {
-				fatalf("seek %s: %v", genPath, serr)
-			}
-			raw, err = io.ReadAll(f)
-			if cerr := f.Close(); cerr != nil {
-				fatalf("close %s: %v", genPath, cerr)
-			}
-			if err != nil {
-				fatalf("read %s: %v", genPath, err)
-			}
-		}
 
-		var g genesisCfg
-		if err := json.Unmarshal(raw, &g); err != nil {
-			fatalf("decode genesis %s: %v", genPath, err)
-		}
-		gotID, err := anyToInt64(g.Config.ChainID)
-		if err != nil {
-			fatalf("%s chainId parse: %v", genPath, err)
-		}
-		if gotID != expectID {
-			fatalf("%s chainId=%d, want %d", genPath, gotID, expectID)
-		}
-		// Compare timestamp vs compose TOML genesis.l2_time if present
-		if ccfg.Genesis.L2Time != 0 {
-			ts, err := anyToInt64(g.Timestamp)
-			if err != nil {
-				fatalf("%s timestamp parse: %v", genPath, err)
+			var g genesisCfg
+			if err := json.Unmarshal(raw, &g); err != nil {
+				fatalf("decode genesis %s: %v", genPath, err)
 			}
-			if ts != int64(ccfg.Genesis.L2Time) {
-				fatalf("%s timestamp=%d, want %d", genPath, ts, ccfg.Genesis.L2Time)
+			gotID, err := anyToInt64(g.Config.ChainID)
+			if err != nil {
+				fatalf("%s chainId parse: %v", genPath, err)
+			}
+			if gotID != expectID {
+				fatalf("%s chainId=%d, want %d", genPath, gotID, expectID)
+			}
+			// Compare timestamp vs compose TOML genesis.l2_time if present
+			if ccfg.Genesis.L2Time != 0 {
+				ts, err := anyToInt64(g.Timestamp)
+				if err != nil {
+					fatalf("%s timestamp parse: %v", genPath, err)
+				}
+				if ts != int64(ccfg.Genesis.L2Time) {
+					fatalf("%s timestamp=%d, want %d", genPath, ts, ccfg.Genesis.L2Time)
+				}
 			}
 		}
 	}
