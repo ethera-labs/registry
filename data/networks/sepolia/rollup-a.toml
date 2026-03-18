@@ -4,7 +4,7 @@ explorer = "https://rollup-a-altda.explorer.sepolia.compose.network"
 chain_id = 555555
 
 [addresses]
-Mailbox = "0x0000000000000000000000000000000000000000"
+Mailbox = "0xC1c10121ee7b14c8C2262FF41dc6988d7cECB8D7"
 
 [genesis]
 l2_time = 1773748968
