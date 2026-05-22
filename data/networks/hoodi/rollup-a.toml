@@ -4,7 +4,7 @@ explorer = "https://rollup-a.explorer.compose.network"
 chain_id = 11113
 
 [addresses]
-Mailbox = "0x939F91F5e7d2a5FF4616A9415682CBF775596997"
+Mailbox = "0xA0441dDe3a06ADa36BDA1A24Cdde570d6d78b6B2"
 
 [genesis]
 l2_time = 1760691360
